@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
-from operator import index
+
 from werkzeug.security import generate_password_hash, check_password_hash
-from backend.app import db
+
 from app.extensions import db
 
 class UserRole:
@@ -11,8 +11,9 @@ class UserRole:
     ALL = [CITIZEN, ADMIN]
     
 class User(db.Model):
-    __table__ = "users"
-    id = db.Column(db.String(80), unique=True, nullable=False, index=True)    
+    __tablename__ = "users"
+
+    id = db.Column(db.String(80), primary_key=True)
     username = db.Column(db.String(255), unique=True, nullable=False, index=True)
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
@@ -27,14 +28,23 @@ class User(db.Model):
     )
     
     incidents = db.relationship(
-        "Inidents",
-        back_polulate="author",
+        "Incident",
+        back_populates="author",
         cascade="all, delete-orphan",
         lazy="dynamic"
     )
     
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
+
+    @property
+    def password(self):
+        """Password is write-only; only its secure hash is persisted."""
+        raise AttributeError("Password is write-only")
+
+    @password.setter
+    def password(self, password):
+        self.set_password(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -53,5 +63,5 @@ class User(db.Model):
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
         
-        def __repr__(self):
-            return f"<User {slef.id} - {self.username}>"
+    def __repr__(self):
+        return f"<User {self.id} - {self.username}>"

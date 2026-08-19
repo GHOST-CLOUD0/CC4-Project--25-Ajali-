@@ -7,7 +7,9 @@ class MediaType:
     ALL = [IMAGE, VIDEO]
     
 class Media(db.Model):
-    id = db.Column(db.String(80), unique=True, nullable=False, index=True)
+    __tablename__ = "media"
+
+    id = db.Column(db.String(80), primary_key=True)
     incident_id = db.Column(db.String(80), db.ForeignKey("incidents.id"), nullable=False)
     media_type = db.Column(db.String(20), nullable=False)
     file_path = db.Column(db.String(255), nullable=False)
@@ -38,4 +40,4 @@ class Media(db.Model):
         }
         
     def __repr__(self):
-        return f"<Media {self.id} - {self.file_name}for incident {self.incident_id}>" 
+        return f"<Media {self.id} - {self.file_name} for incident {self.incident_id}>"
