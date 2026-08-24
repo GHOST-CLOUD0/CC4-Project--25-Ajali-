@@ -2,7 +2,7 @@ from flask import Blueprint
 from flask_jwt_extended import jwt_required
 
 from app.extensions import db
-from app.models import Incident, IncidentStatus
+from app.models import Incident, IncidentStatus, Media
 from app.utils.decorators import get_current_user
 from app.utils.pagination import paginate
 from app.utils.responses import error, success
@@ -25,7 +25,7 @@ def serialize_incident(incident, *, include_media=False):
     if include_media:
         data["media"] = [
             media.to_dict()
-            for media in incident.media.order_by("created_at ASC").all()
+            for media in incident.media.order_by(Media.created_at.asc()).all()
         ]
     else:
         data["media_count"] = incident.media.count()
@@ -40,7 +40,6 @@ def _get_incident_or_404(incident_id):
 
 
 def _check_can_modify(incident, user):
-    """Owners edit drafts only; admins edit anything."""
     if user.is_admin:
         return None
     if incident.author_id != user.id:
