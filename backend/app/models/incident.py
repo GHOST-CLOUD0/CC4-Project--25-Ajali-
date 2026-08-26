@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from uuid import uuid4
 from app.extensions import db
 
 class IncidentType:
@@ -16,7 +17,7 @@ class IncidentStatus:
 class Incident(db.Model):
     __tablename__ = "incidents"
     
-    id = db.Column(db.String(80), primary_key=True)
+    id = db.Column(db.String(80), primary_key=True, default=lambda: str(uuid4()))
     title = db.Column(db.String(255), nullable=False)
     description = db.Column(db.Text, nullable=False)
     type = db.Column(db.String(20), nullable=False)
@@ -25,12 +26,12 @@ class Incident(db.Model):
     latitude = db.Column(db.Float, nullable=True)
     longitude = db.Column(db.Float, nullable=True)
     
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(
         db.DateTime,
         nullable=False,
-        default=datetime.now(timezone.utc),
-        onupdate=datetime.now(timezone.utc)
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
     )
     
     author_id = db.Column(db.String(80), db.ForeignKey("users.id"), nullable=False)
