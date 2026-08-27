@@ -9,13 +9,20 @@
 		"test": "jest"
 	},
 	"dependencies": {
+		"@reduxjs/toolkit": "latest",
 		"@vitejs/plugin-react": "latest",
+		"axios": "latest",
 		"react": "latest",
 		"react-dom": "latest",
+		"react-redux": "latest",
 		"react-router-dom": "latest"
 	},
 	"devDependencies": {
+		"@swc/jest": "latest",
+		"@testing-library/jest-dom": "latest",
+		"@testing-library/react": "latest",
+		"jest": "latest",
+		"jest-environment-jsdom": "latest",
 		"vite": "latest"
 	}
 }
-

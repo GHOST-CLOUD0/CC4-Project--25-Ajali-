@@ -5,7 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import { store } from "./app/store";
 import App from "./App";
 
-test("renders the Ajali home page", () => {
+test("redirects the home route to the incidents feed", () => {
   render(
     <Provider store={store}>
       <MemoryRouter>
@@ -14,5 +14,6 @@ test("renders the Ajali home page", () => {
     </Provider>,
   );
 
-  expect(screen.getByRole("heading", { name: "Ajali!" })).toBeInTheDocument();
+  // "/" navigates to /incidents, whose page heading is "Incidents".
+  expect(screen.getByRole("heading", { name: "Incidents" })).toBeInTheDocument();
 });
