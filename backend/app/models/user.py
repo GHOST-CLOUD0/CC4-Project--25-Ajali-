@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from uuid import uuid4
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -13,18 +14,18 @@ class UserRole:
 class User(db.Model):
     __tablename__ = "users"
 
-    id = db.Column(db.String(80), primary_key=True)
+    id = db.Column(db.String(80), primary_key=True, default=lambda: str(uuid4()))
     username = db.Column(db.String(255), unique=True, nullable=False, index=True)
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     password_hash = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(20), nullable=False, default=UserRole.CITIZEN)
     
-    created_at = db.Column(db.DateTime, nullable=False, default=datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     updated_at = db.Column(
         db.DateTime, 
         nullable=False, 
-        default=datetime.now(timezone.utc), 
-        onupdate=datetime.now(timezone.utc)
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
     )
     
     incidents = db.relationship(
