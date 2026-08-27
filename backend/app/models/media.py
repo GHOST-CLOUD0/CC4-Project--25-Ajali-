@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from uuid import uuid4
 from app.extensions import db
 
 class MediaType:
@@ -9,19 +10,19 @@ class MediaType:
 class Media(db.Model):
     __tablename__ = "media"
 
-    id = db.Column(db.String(80), primary_key=True)
+    id = db.Column(db.String(80), primary_key=True, default=lambda: str(uuid4()))
     incident_id = db.Column(db.String(80), db.ForeignKey("incidents.id"), nullable=False)
     media_type = db.Column(db.String(20), nullable=False)
     file_path = db.Column(db.String(255), nullable=False)
     file_name = db.Column(db.String(255), nullable=False)
     created_at = db.Column(
         db.DateTime, nullable=False, 
-        default=datetime.now(timezone.utc)
+        default=lambda: datetime.now(timezone.utc)
     )
     updated_at = db.Column(
         db.DateTime, nullable=False, 
-        default=datetime.now(timezone.utc), 
-        onupdate=datetime.now(timezone.utc)
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc)
     )
     incident = db.relationship(
         "Incident",
