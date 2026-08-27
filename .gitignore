@@ -1,8 +1,5 @@
-backend/.env
-frontend/.env
-backend/instance/
-backend/uploads/
-frontend/dist/
 frontend/node_modules/
-.venv/
-pycache
+frontend/dist/
+__pycache__/
+*.py[cod]
+.env
