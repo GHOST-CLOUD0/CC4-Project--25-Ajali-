@@ -10,16 +10,18 @@ Usage:
 
 from functools import wraps
 
-from flask import jsonify, request
+from flask import request
 from marshmallow import Schema, ValidationError, fields, validate, validates, validates_schema
+
+from app.utils.responses import error as error_response
 
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
 
 INCIDENT_TYPES = ("red-flag", "intervention")
-INCIDENT_STATUSES = ("draft", "under investigation", "rejected", "resolved")
-ADMIN_STATUSES = ("under investigation", "rejected", "resolved")
+INCIDENT_STATUSES = ("draft", "under-investigation", "rejected", "resolved")
+ADMIN_STATUSES = ("under-investigation", "rejected", "resolved")
 
 ALLOWED_IMAGE_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 ALLOWED_VIDEO_TYPES = {"video/mp4", "video/webm", "video/quicktime"}
@@ -178,7 +180,7 @@ class IncidentListQuerySchema(Schema):
     per_page = fields.Integer(load_default=10, validate=validate.Range(min=1, max=100))
     incident_type = fields.String(required=False, validate=validate.OneOf(INCIDENT_TYPES))
     status = fields.String(required=False, validate=validate.OneOf(INCIDENT_STATUSES))
-    user_id = fields.Integer(required=False)
+    author_id = fields.String(required=False)
 
 
 class IncidentResponseSchema(Schema):
@@ -260,7 +262,7 @@ class AdminStatusUpdateSchema(Schema):
         required=True,
         validate=validate.OneOf(
             ADMIN_STATUSES,
-            error="Status must be 'under investigation', 'rejected', or 'resolved'.",
+            error="Status must be 'under-investigation', 'rejected', or 'resolved'.",
         ),
     )
     comment = fields.String(
@@ -315,9 +317,8 @@ def validate_request(schema: type[Schema] | Schema, *, source: str = "json"):
                         raise ValidationError({"_schema": ["Request body must be valid JSON."]})
                     data = instance.load(payload)
             except ValidationError as err:
-                return (
-                    jsonify({"status": 400, "error": "Validation failed", "messages": err.messages}),
-                    400,
+                return error_response(
+                    "Validation failed.", status=400, errors=err.messages
                 )
             return fn(*args, validated=data, **kwargs)
 
@@ -331,7 +332,4 @@ def register_validation_error_handler(app):
 
     @app.errorhandler(ValidationError)
     def handle_validation_error(err):
-        return (
-            jsonify({"status": 400, "error": "Validation failed", "messages": err.messages}),
-            400,
-        )
+        return error_response("Validation failed.", status=400, errors=err.messages)

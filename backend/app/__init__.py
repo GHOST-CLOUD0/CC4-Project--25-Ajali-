@@ -18,6 +18,10 @@ def create_app(config_name="development"):
     register_error_handlers(app)
     register_jwt_handlers()
 
+    from app.validation.validation import register_validation_error_handler
+
+    register_validation_error_handler(app)
+
     @app.get("/api/v1/health")
     def health():
         return jsonify(status="ok", service="ajali-backend"), 200
