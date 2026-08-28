@@ -9,6 +9,7 @@ export default defineConfig(({ mode }) => {
       "process.env.VITE_API_URL": JSON.stringify(env.VITE_API_URL ?? ""),
       "process.env.VITE_GOOGLE_MAPS_KEY": JSON.stringify(env.VITE_GOOGLE_MAPS_KEY ?? ""),
       "process.env.VITE_GOOGLE_MAPS_MAP_ID": JSON.stringify(env.VITE_GOOGLE_MAPS_MAP_ID ?? ""),
+      "process.env.VITE_GOOGLE_CLIENT_ID": JSON.stringify(env.VITE_GOOGLE_CLIENT_ID ?? ""),
     },
   };
 });
