@@ -1,10 +1,20 @@
-import { AppRouter } from "./router";
+import { Route, Routes } from "react-router-dom";
+import { AdminRoute } from "./components/AdminRoute";
+import {
+  AdminDashboard,
+  AdminLogin,
+  ForgotPassword,
+  IncidentDetail,
+  LiveFeed,
+  Login,
+  MapView,
+  Register,
+  ReportIncident,
+  ResetPassword,
+  Splash,
+} from "./pages/screens";
 
 export default function App() {
-	return <AppRouter />;
-}
-
-function App() {
   return (
     <Routes>
       {/* Public & Guest Routes */}
@@ -33,5 +43,3 @@ function App() {
     </Routes>
   );
 }
-
-export default App;
