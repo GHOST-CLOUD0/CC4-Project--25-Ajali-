@@ -11,7 +11,7 @@ Usage:
 from functools import wraps
 
 from flask import request
-from marshmallow import Schema, ValidationError, fields, validate, validates, validates_schema
+from marshmallow import Schema, ValidationError, fields, post_load, validate, validates, validates_schema
 
 from app.utils.responses import error as error_response
 
@@ -19,7 +19,8 @@ from app.utils.responses import error as error_response
 # Constants
 # ---------------------------------------------------------------------------
 
-INCIDENT_TYPES = ("red-flag", "intervention")
+INCIDENT_TYPES = ("red-flag", "intervention", "sos")
+SOS_CATEGORIES = ("ambulance", "accident", "fire", "crime", "flood", "other")
 INCIDENT_STATUSES = ("draft", "under-investigation", "rejected", "resolved")
 ADMIN_STATUSES = ("under-investigation", "rejected", "resolved")
 
@@ -98,20 +99,43 @@ class UserResponseSchema(Schema):
 
 
 class IncidentCreateSchema(Schema):
-    """POST /incidents"""
+    """POST /incidents — accepts canonical names and legacy aliases (type/location)."""
 
     title = fields.String(required=True, validate=validate.Length(min=5, max=200))
     description = fields.String(required=True, validate=validate.Length(min=20, max=5000))
     incident_type = fields.String(
-        required=True,
+        required=False,
         validate=validate.OneOf(
             INCIDENT_TYPES,
-            error="incident_type must be 'red-flag' or 'intervention'.",
+            error="incident_type must be 'red-flag', 'intervention', or 'sos'.",
+        ),
+    )
+    type = fields.String(  # legacy alias for incident_type
+        required=False,
+        validate=validate.OneOf(
+            INCIDENT_TYPES,
+            error="type must be 'red-flag', 'intervention', or 'sos'.",
         ),
     )
     latitude = fields.Float(required=True)
     longitude = fields.Float(required=True)
     location_name = fields.String(required=False, allow_none=True, validate=validate.Length(max=255))
+    location = fields.String(required=False, allow_none=True, validate=validate.Length(max=255))  # legacy alias
+
+    @validates_schema
+    def require_type(self, data, **kwargs):
+        if not data.get("incident_type") and not data.get("type"):
+            raise ValidationError("incident_type is required.", field_name="incident_type")
+
+    @post_load
+    def normalize_aliases(self, data, **kwargs):
+        if data.get("type") and not data.get("incident_type"):
+            data["incident_type"] = data["type"]
+        if data.get("location") and not data.get("location_name"):
+            data["location_name"] = data["location"]
+        data.pop("type", None)
+        data.pop("location", None)
+        return data
 
     @validates("latitude")
     def validate_latitude(self, value, **kwargs):
@@ -171,6 +195,37 @@ class IncidentGeolocationSchema(Schema):
     def validate_longitude(self, value, **kwargs):
         if value < -180 or value > 180:
             raise ValidationError("Longitude must be between -180 and 180.")
+
+
+class SOSSchema(Schema):
+    """POST /sos — anonymous panic-button alert (no login required)."""
+
+    category = fields.String(
+        required=True,
+        validate=validate.OneOf(
+            SOS_CATEGORIES,
+            error="category must be one of: ambulance, accident, fire, crime, flood, other.",
+        ),
+    )
+    description = fields.String(required=False, allow_none=True, validate=validate.Length(max=1000))
+    latitude = fields.Float(required=False, allow_none=True)
+    longitude = fields.Float(required=False, allow_none=True)
+    location_name = fields.String(required=False, allow_none=True, validate=validate.Length(max=255))
+
+    @validates("latitude")
+    def validate_sos_latitude(self, value, **kwargs):
+        if value is not None and (value < -90 or value > 90):
+            raise ValidationError("Latitude must be between -90 and 90.")
+
+    @validates("longitude")
+    def validate_sos_longitude(self, value, **kwargs):
+        if value is not None and (value < -180 or value > 180):
+            raise ValidationError("Longitude must be between -180 and 180.")
+
+    @validates_schema
+    def coordinates_together(self, data, **kwargs):
+        if (data.get("latitude") is None) != (data.get("longitude") is None):
+            raise ValidationError("latitude and longitude must be sent together.")
 
 
 class IncidentListQuerySchema(Schema):

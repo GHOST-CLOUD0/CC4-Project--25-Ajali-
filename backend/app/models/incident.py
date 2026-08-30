@@ -7,7 +7,8 @@ from app.extensions import db
 class IncidentType:
     RED_FLAG = "red-flag"
     INTERVENTION = "intervention"
-    ALL = [RED_FLAG, INTERVENTION]
+    SOS = "sos"
+    ALL = [RED_FLAG, INTERVENTION, SOS]
 
 
 class IncidentStatus:
@@ -38,7 +39,7 @@ class Incident(db.Model):
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
-    author_id = db.Column(db.String(80), db.ForeignKey("users.id"), nullable=False)
+    author_id = db.Column(db.String(80), db.ForeignKey("users.id"), nullable=True)
     author = db.relationship("User", back_populates="incidents")
 
     media = db.relationship(
@@ -47,6 +48,14 @@ class Incident(db.Model):
         cascade="all, delete-orphan",
         lazy="dynamic",
     )
+
+    def __init__(self, **kwargs):
+        # Accept legacy keyword aliases ("type"/"location") used by older code.
+        if "type" in kwargs and "incident_type" not in kwargs:
+            kwargs["incident_type"] = kwargs.pop("type")
+        if "location" in kwargs and "location_name" not in kwargs:
+            kwargs["location_name"] = kwargs.pop("location")
+        super().__init__(**kwargs)
 
     def set_geolocation(self, latitude: float, longitude: float, address=None):
         self.latitude = latitude

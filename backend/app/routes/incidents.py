@@ -68,7 +68,7 @@ def _filtered_select(args):
 def list_incidents():
     args = validate_query(IncidentListQuerySchema)
     items, meta = paginate(_filtered_select(args), serialize_incident)
-    return success({"incidents": items}, meta=meta)
+    return success({"incidents": items}, pagination=meta)
 
 
 @incidents_bp.get("/mine")
@@ -77,7 +77,7 @@ def my_incidents():
     args = validate_query(IncidentListQuerySchema)
     args["author_id"] = get_current_user().id
     items, meta = paginate(_filtered_select(args), serialize_incident)
-    return success({"incidents": items}, meta=meta)
+    return success({"incidents": items}, pagination=meta)
 
 
 @incidents_bp.get("/<incident_id>")

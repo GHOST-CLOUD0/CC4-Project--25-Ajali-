@@ -5,7 +5,7 @@ import { MemoryRouter } from "react-router-dom";
 import { store } from "./app/store";
 import App from "./App";
 
-test("redirects the home route to the incidents feed", () => {
+test("shows the splash screen on the home route", () => {
   render(
     <Provider store={store}>
       <MemoryRouter>
@@ -14,6 +14,7 @@ test("redirects the home route to the incidents feed", () => {
     </Provider>,
   );
 
-  // "/" navigates to /incidents, whose page heading is "Incidents".
-  expect(screen.getByRole("heading", { name: "Incidents" })).toBeInTheDocument();
+  // "/" renders the Splash screen with the Ajali! heading and SOS entry point.
+  expect(screen.getByRole("heading", { name: "Ajali!" })).toBeInTheDocument();
+  expect(screen.getByRole("link", { name: /Emergency SOS/i })).toHaveAttribute("href", "/sos");
 });

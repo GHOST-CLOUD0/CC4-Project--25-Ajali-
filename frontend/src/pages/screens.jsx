@@ -36,7 +36,7 @@ export function Splash() {
         <p>Report accidents &amp; emergencies<br />near you in seconds</p>
       </section>
       <div className="splash-actions">
-        <Link className="btn btn-sos btn-block" to="/report">⚠️ Emergency SOS</Link>
+        <Link className="btn btn-sos btn-block" to="/sos">⚠️ Emergency SOS</Link>
         {user ? (
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
             <Link className="btn btn-white btn-block" to={user.role === "admin" ? "/admin" : "/feed"}>

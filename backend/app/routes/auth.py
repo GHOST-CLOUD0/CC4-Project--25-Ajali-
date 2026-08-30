@@ -1,3 +1,5 @@
+import secrets
+
 from flask import Blueprint, request
 from flask_jwt_extended import create_access_token
 
@@ -41,3 +43,45 @@ def login():
 
     token = create_access_token(identity=user.id, additional_claims={"role": user.role})
     return success({"access_token": token, "user": user.to_dict()}, message="Signed in.")
+
+
+@auth_bp.post("/forgot-password")
+def forgot_password():
+    payload = request.get_json(silent=True) or {}
+    email = str(payload.get("email", "")).strip().lower()
+    if not email:
+        return error("Email is required.")
+
+    user = User.query.filter_by(email=email).first()
+    if user is None:
+        return error("No account found with that email.", 404)
+
+    user.password_reset_token = secrets.token_urlsafe(32)
+    db.session.commit()
+    # No email service yet, so the token is returned directly for the demo.
+    # In production this is emailed/SMS'd and never exposed in the response.
+    return success(
+        {"reset_token": user.password_reset_token},
+        message="Password reset token generated.",
+    )
+
+
+@auth_bp.post("/reset-password")
+def reset_password():
+    payload = request.get_json(silent=True) or {}
+    token = str(payload.get("token", "")).strip()
+    password = payload.get("password", "")
+
+    if not token or not password:
+        return error("token and password are required.")
+    if len(password) < 8:
+        return error("Password must be at least 8 characters long.")
+
+    user = User.query.filter_by(password_reset_token=token).first()
+    if user is None:
+        return error("Invalid or expired reset token.")
+
+    user.set_password(password)
+    user.password_reset_token = None
+    db.session.commit()
+    return success(message="Password updated. You can now log in with your new password.")

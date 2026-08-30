@@ -70,8 +70,8 @@ class IncidentService:
         incident = Incident(
             title=title,
             description=description,
-            type=incident_type,
-            location=location,
+            incident_type=incident_type,
+            location_name=location,
             latitude=lat,
             longitude=lng,
             author_id=author_id,
@@ -87,18 +87,24 @@ class IncidentService:
         if incident.author_id != author_id:
             raise ForbiddenError("You can only edit your own incident reports.")
 
-        for field in ("title", "description", "location"):
+        for field in ("title", "description"):
             if field in payload:
                 value = str(payload[field]).strip()
                 if not value:
                     raise ValidationError(f"{field} cannot be empty.")
                 setattr(incident, field, value)
 
+        if "location" in payload:
+            value = str(payload["location"]).strip()
+            if not value:
+                raise ValidationError("location cannot be empty.")
+            incident.location_name = value
+
         if "type" in payload:
             incident_type = payload["type"]
             if incident_type not in IncidentType.ALL:
                 raise ValidationError("Invalid incident type.")
-            incident.type = incident_type
+            incident.incident_type = incident_type
 
         if "latitude" in payload or "longitude" in payload:
             lat, lng = IncidentService.validate_coordinates(payload.get("latitude"), payload.get("longitude"))

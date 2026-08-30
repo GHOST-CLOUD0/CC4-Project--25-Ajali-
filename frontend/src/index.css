@@ -724,3 +724,41 @@ img, video, iframe { height: auto; }
     animation-iteration-count: 1 !important;
   }
 }
+/* === SOS panic flow (/sos) === */
+.btn-sos { background: var(--brand-red); color: #fff; box-shadow: 0 8px 24px rgba(226, 29, 46, .4); font-weight: 800; letter-spacing: .5px; }
+.btn-sos:hover { background: var(--brand-red-dark); color: #fff; }
+
+.sos-screen { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 20px 20px 40px; text-align: center; width: 100%; }
+.sos-screen h1 { font-size: 26px; }
+.sos-sub { color: var(--ink-soft); font-size: 14px; margin: 0; }
+.sos-back { align-self: flex-start; color: var(--ink-soft); font-weight: 600; text-decoration: none; font-size: 14px; }
+
+.sos-pill { background: var(--bg-soft); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px; font-size: 13px; color: var(--ink-soft); margin: 0; display: inline-flex; align-items: center; gap: 6px; }
+.sos-pill.ok { background: #e8f7ee; border-color: #b7e4c7; color: #1b7a3d; }
+.sos-pill.warn { background: #fff5e6; border-color: #ffd9a0; color: #9a5b00; }
+
+.sos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+.sos-tile { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 18px 10px; border: 1.5px solid var(--line); border-radius: 16px; background: #fff; cursor: pointer; font-family: inherit; color: var(--ink); }
+.sos-tile:active { transform: scale(.97); }
+.sos-tile-icon { font-size: 34px; }
+.sos-tile small { color: var(--muted); }
+.sos-tile-active { border-color: var(--brand-red); background: var(--brand-red-soft); width: 100%; }
+
+.sos-note { width: 100%; text-align: left; resize: none; }
+
+.sos-panic { width: 190px; height: 190px; border-radius: 50%; border: 6px solid #fff; background: radial-gradient(circle at 30% 30%, #ff5252, var(--brand-red) 60%, var(--brand-red-dark)); color: #fff; font-size: 30px; font-weight: 900; letter-spacing: 2px; cursor: pointer; animation: sos-pulse 1.6s ease-out infinite; margin: 8px 0; }
+.sos-panic:disabled { opacity: .65; animation: none; cursor: wait; font-size: 18px; }
+@keyframes sos-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(226, 29, 46, .45); }
+  70% { box-shadow: 0 0 0 30px rgba(226, 29, 46, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(226, 29, 46, 0); }
+}
+
+.sos-call-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.sos-call { display: inline-block; background: #fff; border: 1.5px solid var(--line); border-radius: 999px; padding: 10px 16px; font-weight: 700; font-size: 14px; color: var(--ink); text-decoration: none; }
+.sos-call:active { transform: scale(.97); }
+
+.sos-note-strong { font-weight: 700; font-size: 14px; margin: 0; }
+.sos-sent-mark { font-size: 72px; margin-top: 24px; }
+.sos-ref { font-family: monospace; background: var(--bg-soft); border: 1px dashed var(--line); border-radius: 10px; padding: 8px 14px; font-size: 14px; margin: 0; }
+.sos-done { margin-top: 12px; max-width: 320px; }
