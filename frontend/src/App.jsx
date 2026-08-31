@@ -12,7 +12,7 @@ import {
   ReportIncident,
   ResetPassword,
   Splash,
-} from "./pages/screens";
+} from "./pages";
 
 export default function App() {
   return (
