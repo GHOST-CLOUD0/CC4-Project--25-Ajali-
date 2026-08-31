@@ -139,6 +139,48 @@ h1, h2, h3 { margin: 0; }
 .btn-block { width: 100%; }
 .btn-primary { background: var(--brand-red); color: #fff; box-shadow: var(--shadow-float); }
 .btn-primary:hover { background: var(--brand-red-dark); }
+
+/* Label Slide Button ------------------------------------------------------ */
+.label-slide-button {
+  --label-button-fill: #fff;
+  --label-button-text: #111;
+  align-items: center;
+  background: var(--label-button-fill);
+  border: 1px solid #111;
+  border-radius: 999px;
+  color: var(--label-button-text);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  justify-content: space-between;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  min-height: 58px;
+  overflow: hidden;
+  padding: 8px 10px 8px 26px;
+  text-transform: uppercase;
+  transition: background-color 350ms cubic-bezier(.16, 1, .3, 1), color 350ms cubic-bezier(.16, 1, .3, 1), border-color 350ms cubic-bezier(.16, 1, .3, 1), transform 180ms ease;
+}
+.label-slide-button--block { width: 100%; }
+.label-slide-button__label { display: grid; height: 1.2em; overflow: hidden; }
+.label-slide-button__label > span { grid-area: 1 / 1; transition: transform 350ms cubic-bezier(.16, 1, .3, 1); }
+.label-slide-button__label > span:last-child { transform: translateY(120%); }
+.label-slide-button__badge { background: #222; border-radius: 50%; color: #fff; display: grid; flex: 0 0 42px; height: 42px; overflow: hidden; place-items: center; transition: background-color 350ms cubic-bezier(.16, 1, .3, 1), color 350ms cubic-bezier(.16, 1, .3, 1); width: 42px; }
+.label-slide-button__badge > span { grid-area: 1 / 1; font-size: 20px; line-height: 1; transition: transform 250ms ease-in-out; }
+.label-slide-button__badge > span:last-child { transform: translate(-120%, 120%); }
+.label-slide-button:hover:not(:disabled), .label-slide-button:focus-visible { background: #fc731c; border-color: #fc731c; color: #fff; }
+.label-slide-button:hover:not(:disabled) .label-slide-button__label > span:first-child, .label-slide-button:focus-visible .label-slide-button__label > span:first-child { transform: translateY(-120%); }
+.label-slide-button:hover:not(:disabled) .label-slide-button__label > span:last-child, .label-slide-button:focus-visible .label-slide-button__label > span:last-child { transform: translateY(0); }
+.label-slide-button:hover:not(:disabled) .label-slide-button__badge, .label-slide-button:focus-visible .label-slide-button__badge { background: #fff; color: #111; }
+.label-slide-button:hover:not(:disabled) .label-slide-button__badge > span:first-child, .label-slide-button:focus-visible .label-slide-button__badge > span:first-child { transform: translate(120%, -120%); }
+.label-slide-button:hover:not(:disabled) .label-slide-button__badge > span:last-child, .label-slide-button:focus-visible .label-slide-button__badge > span:last-child { transform: translate(0); }
+.label-slide-button:active:not(:disabled) { transform: scale(.98); }
+.label-slide-button:disabled { cursor: wait; opacity: .65; }
+@media (prefers-reduced-motion: reduce) {
+  .label-slide-button, .label-slide-button * { transition-duration: 0ms; }
+}
 .btn-outline { background: #fff; color: var(--brand-red); border: 1.5px solid var(--brand-red); }
 .btn-soft { background: var(--bg-soft); color: var(--ink); }
 .btn-ghost { background: transparent; color: var(--ink-soft); }
@@ -316,11 +358,6 @@ textarea.input { resize: vertical; min-height: 110px; line-height: 1.5; }
 .header-copy p { margin: 2px 0 0; font-size: 12px; color: var(--ink-soft); }
 .header-right { font-size: 20px; }
 
-.app-shell footer{
-  background: var(--brand-red);
-  color: #fff;
-}
-
 /* ------------------------------------------------------------------ */
 /* Feed cards (live incident feed)                                    */
 /* ------------------------------------------------------------------ */
@@ -348,10 +385,11 @@ textarea.input { resize: vertical; min-height: 110px; line-height: 1.5; }
 .feed-meta { display: flex; flex-direction: column; gap: 4px; margin-top: 12px; font-size: 13px; color: var(--ink-soft); }
 .feed-meta .row { display: flex; align-items: center; gap: 7px; }
 .feed-footer {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line);
-  font-size: 12.5px; color: var(--muted);
+  margin-top: 12px;
 }
+.label-slide-button--card { min-height: 44px; padding-left: 16px; text-decoration: none; width: 100%; }
+.label-slide-button--card .label-slide-button__badge { flex-basis: 32px; height: 32px; width: 32px; }
+.label-slide-button--card .label-slide-button__badge > span { font-size: 16px; }
 .view-details { color: var(--brand-red); font-weight: 700; text-decoration: none; font-size: 13px; }
 
 /* Filter chip row (used above feed list, e.g. admin "filter by status") */

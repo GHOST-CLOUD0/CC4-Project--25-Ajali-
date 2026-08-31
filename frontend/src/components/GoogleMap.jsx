@@ -37,20 +37,21 @@ export function GoogleMap({
   zoom,
   large = false,
   interactive = false,
+  showLiveLocation = true,
   onLocationSelect,
 }) {
   const mapContainerRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const markersRef = useRef([]);
+  const userMarkerRef = useRef(null);
   const infoWindowRef = useRef(null);
   const [error, setError] = useState("");
   const [loaded, setLoaded] = useState(false);
+  const [userCoords, setUserCoords] = useState(null);
 
-  // Initialize Map
+  // 1. Initialize Map Instance
   useEffect(() => {
-    if (!API_KEY) {
-      return;
-    }
+    if (!API_KEY) return;
 
     let cancelled = false;
 
@@ -86,8 +87,8 @@ export function GoogleMap({
 
         if (interactive && onLocationSelect) {
           map.addListener("click", (e) => {
-            const lat = e.latLng.lat();
-            const lng = e.latLng.lng();
+            const lat = Number(e.latLng.lat().toFixed(6));
+            const lng = Number(e.latLng.lng().toFixed(6));
             onLocationSelect({ lat, lng });
           });
         }
@@ -100,10 +101,81 @@ export function GoogleMap({
       cancelled = true;
       markersRef.current.forEach((m) => m.setMap(null));
       markersRef.current = [];
+      if (userMarkerRef.current) {
+        userMarkerRef.current.setMap(null);
+      }
     };
   }, []);
 
-  // Update Markers & Bounds when incidents or center change
+  // 2. Track Live GPS User Location
+  useEffect(() => {
+    if (!showLiveLocation || typeof navigator === "undefined" || !navigator.geolocation) return;
+
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        setUserCoords({
+          lat: Number(pos.coords.latitude.toFixed(6)),
+          lng: Number(pos.coords.longitude.toFixed(6)),
+        });
+      },
+      (err) => {
+        console.warn("Live GPS unavailable:", err.message);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
+  }, [showLiveLocation]);
+
+  // 3. Render / Update User Location Blue Marker
+  useEffect(() => {
+    if (!loaded || !mapInstanceRef.current || !userCoords || !window.google?.maps) return;
+
+    const maps = window.google.maps;
+    const map = mapInstanceRef.current;
+
+    if (userMarkerRef.current) {
+      userMarkerRef.current.setPosition(userCoords);
+    } else {
+      userMarkerRef.current = new maps.Marker({
+        position: userCoords,
+        map,
+        title: "Your Live GPS Location",
+        icon: {
+          path: maps.SymbolPath.CIRCLE,
+          scale: 8,
+          fillColor: "#1a73e8",
+          fillOpacity: 1,
+          strokeColor: "#ffffff",
+          strokeWeight: 2.5,
+        },
+      });
+    }
+  }, [userCoords, loaded]);
+
+  // 4. Center to Current User Location Helper
+  const handleRecenter = () => {
+    if (userCoords && mapInstanceRef.current) {
+      mapInstanceRef.current.panTo(userCoords);
+      mapInstanceRef.current.setZoom(15);
+    } else if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const coords = {
+          lat: Number(pos.coords.latitude.toFixed(6)),
+          lng: Number(pos.coords.longitude.toFixed(6)),
+        };
+        setUserCoords(coords);
+        if (mapInstanceRef.current) {
+          mapInstanceRef.current.panTo(coords);
+          mapInstanceRef.current.setZoom(15);
+        }
+      });
+    }
+  };
+
+  // 5. Render Incident Markers & Fit Camera Bounds
   useEffect(() => {
     if (!loaded || !mapInstanceRef.current || !window.google?.maps) return;
 
@@ -149,10 +221,10 @@ export function GoogleMap({
       marker.addListener("click", () => {
         if (infoWindowRef.current) {
           const content = `
-            <div style="font-family: sans-serif; padding: 4px; max-width: 200px;">
+            <div style="font-family: sans-serif; padding: 4px; max-width: 220px;">
               <h4 style="margin: 0 0 4px; font-size: 14px; font-weight: bold; color: #111;">${item.title}</h4>
-              <p style="margin: 0 0 4px; font-size: 12px; color: #555;">${item.type || ""} · <strong>${item.status || ""}</strong></p>
-              ${item.location ? `<p style="margin: 0; font-size: 11px; color: #777;">📍 ${item.location}</p>` : ""}
+              <p style="margin: 0 0 4px; font-size: 12px; color: #555;">${item.incident_type || item.type || ""} · <strong>${item.status || ""}</strong></p>
+              ${item.location_name || item.location ? `<p style="margin: 0; font-size: 11px; color: #777;">📍 ${item.location_name || item.location}</p>` : ""}
             </div>
           `;
           infoWindowRef.current.setContent(content);
@@ -186,7 +258,34 @@ export function GoogleMap({
   }
 
   return (
-    <div className={`map-container ${large ? "map-large" : ""}`}>
+    <div className={`map-container ${large ? "map-large" : ""}`} style={{ position: "relative" }}>
+      {showLiveLocation && loaded && (
+        <button
+          type="button"
+          onClick={handleRecenter}
+          className="map-recenter-btn"
+          style={{
+            position: "absolute",
+            top: "12px",
+            right: "12px",
+            zIndex: 5,
+            background: "#ffffff",
+            border: "1px solid #d0d5dd",
+            borderRadius: "8px",
+            padding: "6px 12px",
+            fontSize: "12px",
+            fontWeight: "600",
+            cursor: "pointer",
+            boxShadow: "0 2px 6px rgba(0, 0, 0, 0.15)",
+            display: "flex",
+            alignItems: "center",
+            gap: "5px",
+            color: "#1d2939",
+          }}
+        >
+          📍 Center to My GPS
+        </button>
+      )}
       {error ? (
         <p className="map-error">{error}</p>
       ) : (

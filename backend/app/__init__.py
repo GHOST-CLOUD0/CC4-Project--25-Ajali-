@@ -22,6 +22,10 @@ def create_app(config_name="development"):
 
     register_validation_error_handler(app)
 
+    with app.app_context():
+        from app.models import Incident, Media, User  # noqa: F401
+        db.create_all()
+
     @app.get("/api/v1/health")
     def health():
         return jsonify(status="ok", service="ajali-backend"), 200
