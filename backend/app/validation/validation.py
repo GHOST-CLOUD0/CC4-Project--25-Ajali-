@@ -19,7 +19,7 @@ from app.utils.responses import error as error_response
 # Constants
 # ---------------------------------------------------------------------------
 
-INCIDENT_TYPES = ("red-flag", "intervention")
+INCIDENT_TYPES = ("red-flag", "intervention", "sos")
 INCIDENT_STATUSES = ("draft", "under-investigation", "rejected", "resolved")
 ADMIN_STATUSES = ("under-investigation", "rejected", "resolved")
 
@@ -101,7 +101,7 @@ class IncidentCreateSchema(Schema):
     """POST /incidents"""
 
     title = fields.String(required=True, validate=validate.Length(min=5, max=200))
-    description = fields.String(required=True, validate=validate.Length(min=20, max=5000))
+    description = fields.String(required=True, validate=validate.Length(min=5, max=5000))
     incident_type = fields.String(
         required=True,
         validate=validate.OneOf(
@@ -128,7 +128,7 @@ class IncidentUpdateSchema(Schema):
     """PATCH /incidents/<id>"""
 
     title = fields.String(validate=validate.Length(min=5, max=200))
-    description = fields.String(validate=validate.Length(min=20, max=5000))
+    description = fields.String(validate=validate.Length(min=5, max=5000))
     incident_type = fields.String(
         validate=validate.OneOf(
             INCIDENT_TYPES,

@@ -7,7 +7,8 @@ from app.extensions import db
 class IncidentType:
     RED_FLAG = "red-flag"
     INTERVENTION = "intervention"
-    ALL = [RED_FLAG, INTERVENTION]
+    SOS = "sos"
+    ALL = [RED_FLAG, INTERVENTION, SOS]
 
 
 class IncidentStatus:
@@ -38,7 +39,7 @@ class Incident(db.Model):
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
-    author_id = db.Column(db.String(80), db.ForeignKey("users.id"), nullable=False)
+    author_id = db.Column(db.String(80), db.ForeignKey("users.id"), nullable=True)
     author = db.relationship("User", back_populates="incidents")
 
     media = db.relationship(

@@ -11,7 +11,7 @@ export function Splash() {
       <div />
       <section className="splash-hero"><div className="siren-mark">🚨</div><h1>Ajali!</h1><strong>KENYA EMERGENCY PORTAL</strong><p>Report accidents &amp; emergencies<br />near you in seconds</p></section>
       <div className="splash-actions">
-        <Link className="btn btn-sos btn-block" to="/report">⚠️ Emergency SOS</Link>
+        <Link className="btn btn-sos btn-block" to="/sos">⚠️ Emergency SOS</Link>
         {user ? <div style={{ display: "flex", flexDirection: "column", gap: "8px", width: "100%" }}>
           <Link className="btn btn-white btn-block" to={user.role === "admin" ? "/admin" : "/feed"}>Continue as {user.username || user.email} &rarr;</Link>
           <button type="button" className="btn btn-soft btn-block" onClick={() => dispatch(signOut())}>Sign Out / Switch Account</button>

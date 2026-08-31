@@ -11,6 +11,7 @@ import {
   Register,
   ReportIncident,
   ResetPassword,
+  SOSFlow,
   Splash,
 } from "./pages";
 
@@ -23,6 +24,9 @@ export default function App() {
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
+
+      {/* Anonymous SOS panic flow — no login required */}
+      <Route path="/sos" element={<SOSFlow />} />
 
       {/* Dedicated Admin Login */}
       <Route path="/admin/login" element={<AdminLogin />} />

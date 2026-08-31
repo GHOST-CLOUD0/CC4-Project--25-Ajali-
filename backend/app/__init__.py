@@ -34,11 +34,13 @@ def register_blueprints(app):
     from app.routes.incidents import incidents_bp
     from app.routes.media import media_bp
     from app.routes.admin import admin_bp
+    from app.routes.sos import sos_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/v1/auth")
     app.register_blueprint(incidents_bp, url_prefix="/api/v1/incidents")
     app.register_blueprint(media_bp, url_prefix="/api/v1")
     app.register_blueprint(admin_bp, url_prefix="/api/v1/admin")
+    app.register_blueprint(sos_bp, url_prefix="/api/v1")
 
 
 def register_error_handlers(app):
