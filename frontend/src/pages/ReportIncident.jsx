@@ -1,0 +1,12 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api/client";
+import { AppHeader } from "../components/ui";
+import { reportTypes } from "../data/mockIncidents";
+import { Field, Shell } from "./shared";
+
+export function ReportIncident() {
+  const navigate = useNavigate(); const [type, setType] = useState("red-flag"); const [title, setTitle] = useState(""); const [description, setDescription] = useState(""); const [locationName, setLocationName] = useState(""); const [submitting, setSubmitting] = useState(false); const [error, setError] = useState("");
+  const submit = async (event) => { event.preventDefault(); setError(""); setSubmitting(true); try { const incidentType = type.toLowerCase().includes("intervention") ? "intervention" : "red-flag"; await api.post("/incidents", { title, description, incident_type: incidentType, location_name: locationName || "Nairobi", latitude: -1.286389, longitude: 36.817223 }); navigate("/feed"); } catch (requestError) { setError(requestError.response?.data?.message || "Failed to submit report. Please log in first."); } finally { setSubmitting(false); } };
+  return <Shell nav><AppHeader title="Report an incident" right="🚨" /><main className="screen screen-nav"><form onSubmit={submit}>{error && <p className="form-error" role="alert" style={{ color: "red", marginBottom: "12px" }}>{error}</p>}<h2 className="section-label">Select Incident Type</h2><div className="type-grid">{reportTypes.map(([icon, label]) => <button type="button" key={label} onClick={() => setType(label)} className={`type-option ${type === label ? "selected" : ""}`}><span>{icon}</span>{label}</button>)}</div><Field label="Incident Title"><input className="input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Multi-car accident Mombasa Road" required /></Field><Field label="Description & Details"><textarea className="input" value={description} onChange={(event) => setDescription(event.target.value)} placeholder="Provide specifics (e.g. injuries, blocked lanes)..." required /></Field><Field label="Location Name / Landmark"><input className="input" value={locationName} onChange={(event) => setLocationName(event.target.value)} placeholder="e.g. Near Bellevue, Mombasa Road" /></Field><button className="btn btn-primary btn-block btn-lg" type="submit" disabled={submitting}>{submitting ? "Submitting Report…" : "🚨 Submit report"}</button></form></main></Shell>;
+}

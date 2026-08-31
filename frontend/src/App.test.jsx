@@ -1,3 +1,4 @@
+// frontend/src/App.test.jsx
 import { render, screen } from "@testing-library/react";
 import { Provider } from "react-redux";
 import { MemoryRouter } from "react-router-dom";
@@ -5,15 +6,16 @@ import { MemoryRouter } from "react-router-dom";
 import { store } from "./app/store";
 import App from "./App";
 
-test("redirects the home route to the incidents feed", () => {
+test("renders the Splash landing page on root route", () => {
   render(
     <Provider store={store}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={["/"]}>
         <App />
       </MemoryRouter>
     </Provider>,
   );
 
-  // "/" navigates to /incidents, whose page heading is "Incidents".
-  expect(screen.getByRole("heading", { name: "Incidents" })).toBeInTheDocument();
+  // Verifies the Splash hero heading
+  expect(screen.getByRole("heading", { name: /ajali!/i })).toBeInTheDocument();
+  expect(screen.getByText(/kenya emergency portal/i)).toBeInTheDocument();
 });
