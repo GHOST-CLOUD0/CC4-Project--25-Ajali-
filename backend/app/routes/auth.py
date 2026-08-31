@@ -3,6 +3,8 @@ from flask_jwt_extended import create_access_token
 
 from app.extensions import db
 from app.models.user import User
+from app.services.auth_service import AuthService
+from app.services.exceptions import ServiceError
 from app.utils.responses import error, success
 
 auth_bp = Blueprint("auth", __name__)
@@ -41,3 +43,28 @@ def login():
 
     token = create_access_token(identity=user.id, additional_claims={"role": user.role})
     return success({"access_token": token, "user": user.to_dict()}, message="Signed in.")
+
+
+@auth_bp.post("/forgot-password")
+def forgot_password():
+    payload = request.get_json(silent=True) or {}
+    try:
+        user, reset_token = AuthService.request_password_reset(payload.get("email", ""))
+    except ServiceError as err:
+        return error(err.message, status=err.status_code)
+    if user is None:
+        return error("No account found with that email.", 404)
+    return success(
+        {"reset_token": reset_token},
+        message="Password reset instructions have been generated.",
+    )
+
+
+@auth_bp.post("/reset-password")
+def reset_password():
+    payload = request.get_json(silent=True) or {}
+    try:
+        AuthService.reset_password(payload.get("token", ""), payload.get("password", ""))
+    except ServiceError as err:
+        return error(err.message, status=err.status_code)
+    return success(message="Password updated. You can now log in with your new password.")
