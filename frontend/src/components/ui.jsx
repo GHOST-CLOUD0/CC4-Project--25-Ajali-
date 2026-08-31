@@ -1,5 +1,6 @@
 import { useSelector } from "react-redux";
 import { Link, NavLink, useLocation } from "react-router-dom";
+import { LabelSlideLink } from "./LabelSlideButton";
 
 const statusLabels = {
   pending: "Pending",
@@ -104,8 +105,13 @@ export function IncidentCard({ incident, compact = false, onStatusChange }) {
       </div>
       {!compact && (
         <footer className="feed-footer">
-          <span>{incident.age || "Recently"} · {incident.reporter || "Citizen"}</span>
-          <Link className="view-details" to={`/incidents/${incident.id}`}>VIEW DETAILS 👉</Link>
+          <LabelSlideLink
+            className="label-slide-button--card"
+            to={`/incidents/${incident.id}`}
+            aria-label={`View details for ${incident.title}`}
+          >
+            {incident.age || "Recently"} · {incident.reporter || "Citizen"}
+          </LabelSlideLink>
         </footer>
       )}
     </article>

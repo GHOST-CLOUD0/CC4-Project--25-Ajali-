@@ -18,7 +18,12 @@ export function AuthPage({ register = false }) {
       const response = await api.post("/auth/login", { email: form.email, password: form.password });
       const { access_token: accessToken, user } = response.data.data;
       dispatch(setCredentials({ accessToken, user })); navigate(user?.role === "admin" ? "/admin" : "/feed");
-    } catch (requestError) { setError(requestError.response?.data?.message || "Unable to sign in. Please try again."); }
+    } catch (requestError) {
+      setError(
+        requestError.response?.data?.message ||
+        "Cannot reach backend server. Please ensure the backend is running on port 5000."
+      );
+    }
     finally { setSubmitting(false); }
   };
   return <Shell><main className="auth-screen">
