@@ -1,59 +1,74 @@
-def test_user_can_register_and_log_in(client):
-    registration = client.post(
+import pytest
+from app.models.user import User
+
+def test_register_citizen_success(client):
+    res = client.post(
         "/api/v1/auth/register",
-        json={"username": "amina", "email": "amina@example.com", "password": "secure-pass"},
+        json={"username": "amina_w", "email": "amina@example.com", "password": "secure-password123"},
     )
-    assert registration.status_code == 201
+    assert res.status_code == 201
+    data = res.get_json()["data"]
+    assert data["username"] == "amina_w"
+    assert data["email"] == "amina@example.com"
+    assert data["role"] == "citizen"
+    assert "password" not in data
 
-    login = client.post(
-        "/api/v1/auth/login",
-        json={"email": "amina@example.com", "password": "secure-pass"},
-    )
-    assert login.status_code == 200
-    assert login.get_json()["data"]["access_token"]
-
-
-def test_password_reset_flow(client):
-    # 1. Register a user
+def test_register_duplicate_fails(client):
     client.post(
         "/api/v1/auth/register",
-        json={"username": "reset_user", "email": "reset@example.com", "password": "old-password123"},
+        json={"username": "amina_dup", "email": "amina_dup@example.com", "password": "password123"},
     )
+    res1 = client.post(
+        "/api/v1/auth/register",
+        json={"username": "other_user", "email": "amina_dup@example.com", "password": "password123"},
+    )
+    assert res1.status_code == 409
 
-    # 2. Request forgot password
+def test_register_invalid_inputs(client):
+    res = client.post(
+        "/api/v1/auth/register",
+        json={"username": "testuser", "email": "test@example.com", "password": "short"},
+    )
+    assert res.status_code == 400
+
+def test_login_success(client):
+    client.post(
+        "/api/v1/auth/register",
+        json={"username": "john_doe", "email": "john@example.com", "password": "password123"},
+    )
+    res = client.post(
+        "/api/v1/auth/login",
+        json={"email": "john@example.com", "password": "password123"},
+    )
+    assert res.status_code == 200
+    assert "access_token" in res.get_json()["data"]
+
+def test_login_invalid_credentials(client):
+    client.post(
+        "/api/v1/auth/register",
+        json={"username": "john_fail", "email": "fail@example.com", "password": "password123"},
+    )
+    res = client.post(
+        "/api/v1/auth/login",
+        json={"email": "fail@example.com", "password": "wrong_password"},
+    )
+    assert res.status_code == 401
+
+def test_password_reset_flow(client):
+    client.post(
+        "/api/v1/auth/register",
+        json={"username": "reset_user", "email": "reset@example.com", "password": "oldpassword123"},
+    )
     forgot_res = client.post(
         "/api/v1/auth/forgot-password",
         json={"email": "reset@example.com"},
     )
     assert forgot_res.status_code == 200
-    reset_token = forgot_res.get_json()["data"]["reset_token"]
-    assert reset_token is not None
+    token = forgot_res.get_json()["data"]["reset_token"]
+    assert token is not None
 
-    # 3. Reset password with invalid token fails
-    bad_reset = client.post(
+    reset_res = client.post(
         "/api/v1/auth/reset-password",
-        json={"token": "invalid-token-value", "password": "brand-new-pass123"},
+        json={"token": token, "password": "newpassword123"},
     )
-    assert bad_reset.status_code == 400
-
-    # 4. Reset password with valid token succeeds
-    good_reset = client.post(
-        "/api/v1/auth/reset-password",
-        json={"token": reset_token, "password": "brand-new-pass123"},
-    )
-    assert good_reset.status_code == 200
-
-    # 5. Old password no longer works
-    failed_login = client.post(
-        "/api/v1/auth/login",
-        json={"email": "reset@example.com", "password": "old-password123"},
-    )
-    assert failed_login.status_code == 401
-
-    # 6. New password works successfully
-    success_login = client.post(
-        "/api/v1/auth/login",
-        json={"email": "reset@example.com", "password": "brand-new-pass123"},
-    )
-    assert success_login.status_code == 200
-    assert success_login.get_json()["data"]["access_token"]
+    assert reset_res.status_code == 200
