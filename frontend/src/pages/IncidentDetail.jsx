@@ -6,6 +6,7 @@ import api from "../api/client";
 import { GoogleMap } from "../components/GoogleMap";
 import { AppHeader, StatusBadge } from "../components/ui";
 import { incidents as initialIncidents, reportTypes } from "../data/mockIncidents";
+import { adaptIncident } from "../utils/adaptIncident";
 import { Field, Shell } from "./shared";
 
 const API_BASE = (typeof process !== "undefined" && process.env?.VITE_API_URL)
@@ -39,7 +40,7 @@ export function IncidentDetail() {
       const res = await api.get(`/incidents/${id}`);
       const data = res.data?.data?.incident;
       if (data) {
-        setIncident(data);
+        setIncident(adaptIncident(data));
         setEditForm({
           title: data.title || "",
           description: data.description || "",
@@ -50,7 +51,7 @@ export function IncidentDetail() {
       }
     } catch (err) {
       // Fallback to local mock data if not in backend database
-      const fallback = initialIncidents.find((item) => item.id === id) || initialIncidents[0];
+      const fallback = adaptIncident(initialIncidents.find((item) => String(item.id) === String(id)) || initialIncidents[0]);
       setIncident(fallback);
       setEditForm({
         title: fallback.title || "",
