@@ -9,9 +9,14 @@ class IncidentService:
     """Service encapsulating incident report management and admin status lifecycle."""
 
     @staticmethod
-    def validate_coordinates(latitude, longitude) -> tuple[float | None, float | None]:
+    def validate_coordinates(
+        latitude: float | str | None,
+        longitude: float | str | None,
+    ) -> tuple[float | None, float | None]:
         if latitude is None and longitude is None:
             return None, None
+        if latitude is None or longitude is None:
+            raise ValidationError("Both latitude and longitude must be provided together.")
         try:
             lat = float(latitude)
             lng = float(longitude)
@@ -41,14 +46,14 @@ class IncidentService:
 
     @staticmethod
     def create_incident(
-        title: str,
-        description: str,
+        title: str | None = None,
+        description: str | None = None,
         incident_type: str | None = None,
         author_id: str | None = None,
         location: str | None = None,
         location_name: str | None = None,
-        latitude: float | None = None,
-        longitude: float | None = None,
+        latitude: float | str | None = None,
+        longitude: float | str | None = None,
         type: str | None = None,
         **extra,
     ) -> Incident:

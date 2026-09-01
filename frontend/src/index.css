@@ -392,6 +392,13 @@ textarea.input { resize: vertical; min-height: 110px; line-height: 1.5; }
 .label-slide-button--card .label-slide-button__badge > span { font-size: 16px; }
 .view-details { color: var(--brand-red); font-weight: 700; text-decoration: none; font-size: 13px; }
 
+.media-selection { align-items: center; background: var(--bg-soft); border: 1px solid var(--line); border-radius: var(--radius); display: flex; gap: 12px; margin: -4px 0 16px; padding: 10px; }
+.media-selection img { border-radius: 8px; height: 56px; object-fit: cover; width: 56px; }
+.media-selection > span { align-items: center; background: #fff; border-radius: 8px; display: flex; font-size: 24px; height: 56px; justify-content: center; width: 56px; }
+.media-selection div { display: grid; gap: 5px; min-width: 0; }
+.media-selection strong { font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.media-selection .link { background: transparent; border: 0; cursor: pointer; padding: 0; text-align: left; }
+
 /* Filter chip row (used above feed list, e.g. admin "filter by status") */
 .filter-row { margin-top: 6px; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 3px; }
 .filter-row .chip { white-space: nowrap; padding: 8px 12px; font-size: 12px; }
@@ -683,6 +690,21 @@ textarea.input { resize: vertical; min-height: 110px; line-height: 1.5; }
 .map-canvas {
   width: 100%;
   height: 100%;
+}
+.leaflet-container {
+  font-family: inherit;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius);
+  z-index: 1;
+}
+.custom-leaflet-marker {
+  background: transparent;
+  border: none;
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 .map-error {
   display: grid;

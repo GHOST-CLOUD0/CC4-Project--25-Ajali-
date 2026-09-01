@@ -35,6 +35,28 @@ class Media(db.Model):
 
     incident = db.relationship("Incident", back_populates="media")
 
+    def __init__(
+        self,
+        incident_id: str,
+        media_type: str,
+        file_path: str,
+        file_name: str,
+        mime_type: str | None = None,
+        file_size: int | None = None,
+        caption: str | None = None,
+        **kwargs,
+    ):
+        super().__init__()
+        self.incident_id = incident_id
+        self.media_type = media_type
+        self.file_path = file_path
+        self.file_name = file_name
+        self.mime_type = mime_type
+        self.file_size = file_size
+        self.caption = caption
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
     def to_dict(self):
         return {
             "id": self.id,
