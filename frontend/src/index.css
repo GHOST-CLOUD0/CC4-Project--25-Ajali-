@@ -65,6 +65,14 @@ body {
   position: relative;
   box-shadow: 0 0 40px rgba(23, 25, 28, 0.08);
 }
+.app-shell--authenticated {
+  max-width: none;
+  box-shadow: none;
+}
+.app-shell--authenticated .screen {
+  width: 100%;
+  max-width: 1600px;
+}
 
 
 /* ------------------------------------------------------------------ */
@@ -283,7 +291,7 @@ textarea.input { resize: vertical; min-height: 110px; line-height: 1.5; }
   position: fixed;
   bottom: 0;
   left: 50%;
-  width: min(100%, 1200px);
+  width: 100%;
   transform: translateX(-50%);
   display: flex;
   background: var(--brand-red);
