@@ -194,16 +194,14 @@ export function GoogleMap({
 
     const latlngs = [];
 
-    // Create a custom emergency icon
-    const createEmergencyIcon = (type) => {
-      const isIntervention = String(type || "").toLowerCase().includes("intervention");
-      const bg = isIntervention ? "#2563eb" : "#e11d48";
+    // Use a familiar location pin for every reported incident.
+    const createIncidentPin = () => {
       return L.divIcon({
         className: "custom-leaflet-marker",
-        html: `<div style="background:${bg}; width:28px; height:28px; border-radius:50%; border:2px solid #fff; display:grid; place-items:center; box-shadow:0 2px 8px rgba(0,0,0,0.3); font-size:14px;">🚨</div>`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-        popupAnchor: [0, -14],
+        html: '<div style="font-size:32px; line-height:1; filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));">📍</div>',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32],
       });
     };
 
@@ -212,7 +210,7 @@ export function GoogleMap({
       latlngs.push(position);
 
       const marker = L.marker(position, {
-        icon: createEmergencyIcon(item.incident_type || item.type),
+        icon: createIncidentPin(),
       });
 
       const popupContent = `
