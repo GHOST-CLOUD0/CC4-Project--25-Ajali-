@@ -44,16 +44,25 @@ class MediaService:
         if media_type is None:
             raise ValidationError("Unsupported media file type.")
 
-        upload_directory = Path(upload_folder)
+        upload_directory = Path(upload_folder).resolve()
         upload_directory.mkdir(parents=True, exist_ok=True)
         stored_name = f"{uuid4()}{Path(original_name).suffix.lower()}"
-        file.save(upload_directory / stored_name)
+        file_dest = upload_directory / stored_name
+        file.save(file_dest)
+
+        import mimetypes
+        mime_type = getattr(file, "mimetype", None) or mimetypes.guess_type(original_name)[0]
+        file_size = getattr(file, "content_length", None)
+        if not file_size and file_dest.exists():
+            file_size = file_dest.stat().st_size
 
         media = Media(
             incident_id=incident.id,
             media_type=media_type,
             file_name=original_name,
             file_path=stored_name,
+            mime_type=mime_type,
+            file_size=file_size,
         )
         db.session.add(media)
         db.session.commit()
