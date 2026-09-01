@@ -4,18 +4,33 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/client";
 import { AppHeader } from "../components/ui";
 import { reportTypes } from "../data/mockIncidents";
+import useGeolocation from "../hooks/useGeolocation";
 import useMediaUpload from "../hooks/useMediaUpload";
 import { Field, Shell } from "./shared";
 
+// UI label → API incident_type. Reports that need emergency response are
+// interventions; red flags report crime and wrongdoing.
+const TYPE_MAP = {
+  "Road accident": "intervention",
+  Fire: "intervention",
+  Medical: "intervention",
+  Crime: "red-flag",
+  Disaster: "intervention",
+  Other: "intervention",
+};
+
+const FALLBACK_COORDS = { latitude: -1.286389, longitude: 36.817223 }; // Nairobi CBD
+
 export function ReportIncident() {
   const navigate = useNavigate();
-  const [type, setType] = useState("red-flag");
+  const [type, setType] = useState("Road accident");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [locationName, setLocationName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const { file, preview, uploading, error: uploadError, selectFile, clearFile, upload } = useMediaUpload();
+  const { coordinates, error: geoError, loading: locating, getPosition } = useGeolocation();
 
   const submit = async (event) => {
     event.preventDefault();
@@ -23,14 +38,13 @@ export function ReportIncident() {
     setSubmitting(true);
     let incidentCreated = false;
     try {
-      const incidentType = type.toLowerCase().includes("intervention") ? "intervention" : "red-flag";
       const response = await api.post("/incidents", {
         title,
         description,
-        incident_type: incidentType,
+        incident_type: TYPE_MAP[type] || "intervention",
         location_name: locationName || "Nairobi",
-        latitude: -1.286389,
-        longitude: 36.817223,
+        latitude: coordinates?.latitude ?? FALLBACK_COORDS.latitude,
+        longitude: coordinates?.longitude ?? FALLBACK_COORDS.longitude,
       });
       const incident = response.data?.data?.incident;
       incidentCreated = Boolean(incident?.id);
@@ -80,6 +94,16 @@ export function ReportIncident() {
               <div><strong>{file.name}</strong><button type="button" className="link" onClick={clearFile}>Remove</button></div>
             </div>
           )}
+          <button type="button" className="btn btn-soft btn-block" onClick={() => getPosition().catch(() => {})} disabled={locating}>
+            {locating ? "📍 Locating you…" : coordinates ? `✅ Location locked (±${Math.round(coordinates.accuracy ?? 0)}m)` : "📍 Use my current location"}
+          </button>
+          <p className="compact-meta" style={{ margin: "8px 0 14px" }}>
+            {geoError
+              ? "⚠️ Couldn't get GPS — the report will pin to Nairobi CBD."
+              : coordinates
+                ? "Your GPS position will be attached to this report."
+                : "Optional: without GPS the report pins to Nairobi CBD."}
+          </p>
           <button className="btn btn-primary btn-block btn-lg" type="submit" disabled={submitting || uploading}>
             {submitting || uploading ? "Submitting Report…" : "🚨 Submit report"}
           </button>
