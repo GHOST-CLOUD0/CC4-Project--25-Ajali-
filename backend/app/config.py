@@ -3,6 +3,8 @@ from datetime import timedelta
 
 from dotenv import load_dotenv
 
+basedir = os.path.abspath(os.path.dirname(__file__))
+load_dotenv(os.path.join(basedir, "..", ".env"))
 load_dotenv()
 
 
@@ -25,7 +27,12 @@ class Config:
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
     MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100 MB cap
-    UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "uploads")
+    _upload_folder_env = os.getenv("UPLOAD_FOLDER", "uploads")
+    UPLOAD_FOLDER = (
+        _upload_folder_env
+        if os.path.isabs(_upload_folder_env)
+        else os.path.abspath(os.path.join(basedir, "..", _upload_folder_env))
+    )
     ALLOWED_IMAGE_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
     ALLOWED_VIDEO_EXTENSIONS = {"mp4", "mov", "avi", "webm"}
 
