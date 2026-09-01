@@ -34,7 +34,23 @@ class User(db.Model):
         cascade="all, delete-orphan",
         lazy="dynamic"
     )
-    
+
+    def __init__(
+        self,
+        username: str,
+        email: str,
+        role: str = UserRole.CITIZEN,
+        password_hash: str | None = None,
+        **kwargs,
+    ):
+        super().__init__()
+        self.username = username
+        self.email = email
+        self.role = role
+        self.password_hash = password_hash or ""
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 

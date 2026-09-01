@@ -49,6 +49,30 @@ class Incident(db.Model):
         lazy="dynamic",
     )
 
+    def __init__(
+        self,
+        title: str,
+        description: str,
+        incident_type: str,
+        location_name: str | None = None,
+        latitude: float | None = None,
+        longitude: float | None = None,
+        author_id: str | None = None,
+        status: str = IncidentStatus.DRAFT,
+        **kwargs,
+    ):
+        super().__init__()
+        self.title = title
+        self.description = description
+        self.incident_type = incident_type
+        self.location_name = location_name
+        self.latitude = latitude
+        self.longitude = longitude
+        self.author_id = author_id
+        self.status = status
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
     def set_geolocation(self, latitude: float, longitude: float, address=None):
         self.latitude = latitude
         self.longitude = longitude
