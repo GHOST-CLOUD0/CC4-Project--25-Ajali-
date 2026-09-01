@@ -477,16 +477,61 @@ textarea.input { resize: vertical; min-height: 110px; line-height: 1.5; }
 .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
 .coordinate-text { margin-top: 7px !important; font-size: 12px !important; }
 
-.media-thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.media-thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 10px;
+}
 .media-thumb {
+  position: relative;
   aspect-ratio: 1;
   border-radius: var(--radius);
-  background: linear-gradient(135deg, #e8e8e8, #d0d5d8);
-  border: 1px dashed var(--line);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--ink); font-size: 12px; font-weight: 600; text-align: center; padding: 6px;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
-.media-thumb.plus { background: #f4f5f7; font-size: 27px; color: var(--ink-soft); }
+.media-thumb img, .media-thumb video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.media-thumb .media-del-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.15s ease;
+}
+.media-thumb .media-del-btn:hover {
+  background: var(--brand-red);
+}
+.media-thumb.plus {
+  cursor: pointer;
+  background: #f4f5f7;
+  font-size: 24px;
+  color: var(--ink-soft);
+  border: 1.5px dashed var(--line);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.media-thumb.plus:hover {
+  background: #eef2f6;
+  border-color: var(--brand-red);
+  color: var(--brand-red);
+}
 
 .detail-card {
   padding: 16px;
