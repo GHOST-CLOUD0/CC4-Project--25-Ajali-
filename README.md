@@ -22,6 +22,8 @@ instantly shares their live location.
   short-lived signed tokens.
 - 📚 **Versioned REST API** with a complete reference in
   [`docs/api.md`](docs/api.md).
+- 🚀 **One-click deploys** — Render blueprint + Netlify config, with a full
+  walkthrough in [`docs/deployment.md`](docs/deployment.md).
 
 ## 🧰 Tech stack
 
