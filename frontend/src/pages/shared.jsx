@@ -1,9 +1,9 @@
-import { PhoneStatus, BottomNav } from "../components/ui";
+import { TopNavbar, BottomNav } from "../components/ui";
 
 export function Shell({ children, nav = false, className = "" }) {
   return (
     <div className={`app-shell ${nav ? "app-shell--authenticated" : ""} ${className}`}>
-      <PhoneStatus />
+      <TopNavbar />
       {children}
       {nav && <BottomNav />}
     </div>

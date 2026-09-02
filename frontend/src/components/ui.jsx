@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { LabelSlideLink } from "./LabelSlideButton";
@@ -14,9 +15,77 @@ export function StatusBadge({ status }) {
   return <span className={`badge badge-${status}`}>{statusLabels[status] ?? status}</span>;
 }
 
-export function PhoneStatus() {
-  return <div className="statusbar"><span>9:41</span><span className="sb-right">▮▮▮ ◒ ▰</span></div>;
+export function TopNavbar() {
+  const user = useSelector((state) => state.auth?.user);
+  const [isOnline, setIsOnline] = useState(
+    typeof navigator !== "undefined" ? navigator.onLine : true
+  );
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+
+  return (
+    <header className="top-brand-navbar" role="banner">
+      <Link to="/feed" className="brand-logo" title="Ajali Emergency Dispatch">
+        <span className="brand-badge">🚨</span>
+        <span className="brand-text">
+          Ajali<strong>!</strong>
+        </span>
+      </Link>
+
+      <div className="top-nav-actions">
+        {/* Live Network Status Indicator */}
+        <span
+          className={`network-status ${isOnline ? "network-online" : "network-offline"}`}
+          title={isOnline ? "System Online" : "Connection Lost - Working in Offline Mode"}
+        >
+          <span className="status-dot" />
+          <span className="status-label">{isOnline ? "Live" : "Offline"}</span>
+        </span>
+
+        {/* Alerts Bell */}
+        <button
+          type="button"
+          className="nav-icon-btn"
+          aria-label="Alerts"
+          onClick={() => alert("🚨 No active critical emergency broadcasts at this moment.")}
+          title="Emergency Broadcasts"
+        >
+          🔔
+        </button>
+
+        {/* User Profile Pill */}
+        {user ? (
+          <Link
+            to={user.role === "admin" ? "/admin" : "/feed"}
+            className="user-profile-badge"
+            title={`Signed in as ${user.username} (${user.role})`}
+          >
+            <span className="user-avatar">{user.role === "admin" ? "🛡️" : "👤"}</span>
+            <span className="user-name">{user.username}</span>
+            {user.role === "admin" && <span className="role-tag">Admin</span>}
+          </Link>
+        ) : (
+          <Link to="/login" className="nav-signin-link">
+            Sign In
+          </Link>
+        )}
+      </div>
+    </header>
+  );
 }
+
+export const PhoneStatus = TopNavbar;
 
 export function AppHeader({ title, subtitle, back = false, right }) {
   return (
