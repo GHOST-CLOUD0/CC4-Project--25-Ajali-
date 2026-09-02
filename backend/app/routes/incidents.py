@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from flask_jwt_extended import get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
 
 from app.services import IncidentService, ServiceError
 from app.utils.pagination import paginate
@@ -68,10 +68,13 @@ def update_incident(incident_id):
 @incidents_bp.delete("/<incident_id>")
 @jwt_required()
 def delete_incident(incident_id):
+    claims = get_jwt()
+    is_admin = claims.get("role") == "admin"
     try:
         IncidentService.delete_incident(
             incident_id=incident_id,
             author_id=get_jwt_identity(),
+            is_admin=is_admin,
         )
         return success(message="Incident report deleted.")
     except ServiceError as err:

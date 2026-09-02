@@ -57,3 +57,22 @@ def update_incident_status(incident_id):
         return success(incident.to_dict(), message="Incident status updated.")
     except ServiceError as err:
         return error(err.message, err.status_code)
+
+
+@admin_bp.get("/users")
+@admin_required
+def list_users():
+    from app.models.user import User
+    users = User.query.order_by(User.created_at.desc()).all()
+    user_list = [
+        {
+            "id": u.id,
+            "username": u.username,
+            "email": u.email,
+            "role": u.role,
+            "created_at": u.created_at.isoformat() if u.created_at else None,
+            "reports_count": u.incidents.count() if hasattr(u.incidents, "count") else len(u.incidents or []),
+        }
+        for u in users
+    ]
+    return success({"users": user_list, "total": len(user_list)})
