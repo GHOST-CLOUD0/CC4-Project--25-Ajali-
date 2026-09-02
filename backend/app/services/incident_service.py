@@ -126,10 +126,10 @@ class IncidentService:
         return incident
 
     @staticmethod
-    def delete_incident(incident_id: str, author_id: str) -> None:
+    def delete_incident(incident_id: str, author_id: str, is_admin: bool = False) -> None:
         incident = IncidentService.get_incident(incident_id)
 
-        if incident.author_id != author_id:
+        if not is_admin and incident.author_id != author_id:
             raise ForbiddenError("You can only delete your own incident reports.")
 
         db.session.delete(incident)
@@ -148,16 +148,20 @@ class IncidentService:
 
     @staticmethod
     def get_incident_stats() -> dict:
+        from app.models.user import User
         total = db.session.scalar(db.select(db.func.count(Incident.id))) or 0
         draft = db.session.scalar(db.select(db.func.count(Incident.id)).where(Incident.status == IncidentStatus.DRAFT)) or 0
         under_inv = db.session.scalar(db.select(db.func.count(Incident.id)).where(Incident.status == IncidentStatus.UNDER_INVESTIGATION)) or 0
         resolved = db.session.scalar(db.select(db.func.count(Incident.id)).where(Incident.status == IncidentStatus.RESOLVED)) or 0
         rejected = db.session.scalar(db.select(db.func.count(Incident.id)).where(Incident.status == IncidentStatus.REJECTED)) or 0
+        total_users = db.session.scalar(db.select(db.func.count(User.id))) or 0
 
         return {
             "total": total,
             "draft": draft,
+            "pending": draft,
             "under_investigation": under_inv,
             "resolved": resolved,
             "rejected": rejected,
+            "total_users": total_users,
         }
