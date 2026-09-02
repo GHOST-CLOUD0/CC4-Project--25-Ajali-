@@ -27,6 +27,8 @@ class Config:
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
 
     MAX_CONTENT_LENGTH = 100 * 1024 * 1024  # 100 MB cap
+    MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5 MB per image
+    MAX_VIDEO_SIZE = 50 * 1024 * 1024  # 50 MB per video
     _upload_folder_env = os.getenv("UPLOAD_FOLDER", "uploads")
     UPLOAD_FOLDER = (
         _upload_folder_env
