@@ -1,0 +1,10 @@
+# Netlify — one-click deploy of the Ajali! frontend (Vite build).
+# Netlify dashboard → Add new site → Import an existing project → this repo.
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "dist"
+
+# Environment variables are set in the Netlify UI (Site settings → Env vars):
+#   VITE_API_URL = https://<your-render-service>.onrender.com/api/v1
+#   VITE_GOOGLE_MAPS_KEY = (optional — map falls back to a stylised preview)
