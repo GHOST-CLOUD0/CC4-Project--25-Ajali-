@@ -87,8 +87,8 @@ class Incident(db.Model):
     def is_editable(self):
         return self.status == IncidentStatus.DRAFT
 
-    def to_dict(self):
-        return {
+    def to_dict(self, include_private: bool = False):
+        payload = {
             "id": self.id,
             "title": self.title,
             "description": self.description,
@@ -101,13 +101,18 @@ class Incident(db.Model):
             "longitude": self.longitude,
             "author_id": self.author_id,
             "author": self.author.username if self.author else "Anonymous",
-            "author_email": self.author.email if self.author else None,
             "reporter": self.author.username if self.author else "Anonymous",
-            "reporter_email": self.author.email if self.author else None,
             "media": [m.to_dict() for m in self.media.all()] if self.media else [],
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
+        if include_private:
+            # Reporter contact details are for the admin dashboard only —
+            # never leak them on the public feed or anonymous SOS alerts.
+            email = self.author.email if self.author else None
+            payload["author_email"] = email
+            payload["reporter_email"] = email
+        return payload
 
     def __repr__(self):
         return f"<Incident {self.id} - {self.title}>"
