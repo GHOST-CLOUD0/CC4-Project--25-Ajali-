@@ -30,6 +30,8 @@ class MediaService:
         upload_folder: str,
         allowed_images: list[str],
         allowed_videos: list[str],
+        max_image_size: int | None = None,
+        max_video_size: int | None = None,
     ) -> Media:
         incident = IncidentService.get_incident(incident_id)
 
@@ -55,6 +57,12 @@ class MediaService:
         file_size = getattr(file, "content_length", None)
         if not file_size and file_dest.exists():
             file_size = file_dest.stat().st_size
+
+        size_limit = max_image_size if media_type == MediaType.IMAGE else max_video_size
+        if size_limit and file_size and file_size > size_limit:
+            file_dest.unlink(missing_ok=True)
+            label = "Images" if media_type == MediaType.IMAGE else "Videos"
+            raise ValidationError(f"{label} must be {size_limit // (1024 * 1024)} MB or smaller.")
 
         media = Media(
             incident_id=incident.id,
