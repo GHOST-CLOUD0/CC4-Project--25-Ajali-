@@ -131,9 +131,11 @@ Field rules:
 | longitude | number, −180…180 |
 | media file | images `png, jpg, jpeg, gif, webp` ≤ 5 MB · videos `mp4, mov, avi, webm` ≤ 50 MB |
 
-**Concurrency rule:** a report is editable/deletable by its owner only while its
-status is `draft`. Once an admin moves it to `under-investigation`,
-`rejected` or `resolved`, owner edits return `409 Conflict`. Admins may still edit.
+**Concurrency rule:** a report's content is editable by its **owner only**, and only
+while its status is `draft`. Once an admin moves it to `under-investigation`,
+`rejected` or `resolved`, owner edits return `403 Forbidden`. Deletion is
+allowed for the owner — and **admins may delete any report**, in any status
+(added so responders can remove spam/abuse).
 
 ---
 
@@ -216,8 +218,13 @@ Errors: `401` invalid credentials.
 > Demo note: there is no email service yet, so the token is returned directly in
 > the response. In production it would be emailed/SMS'd and never exposed here.
 > Reset tokens are signed JWTs valid for **15 minutes**.
+>
+> Privacy note: for **unknown emails** the endpoint still returns `200` with the
+> generic message *"If an account with that email exists, password reset
+> instructions have been generated."* and **no** `reset_token` — so the API can't
+> be used to probe which emails are registered.
 
-Errors: `400` email missing · `404` no account with that email.
+Errors: `400` email missing.
 
 ### `POST /auth/reset-password` — *public*
 
@@ -322,7 +329,6 @@ Query parameters (all optional):
 | `per_page` | 1–100 (default 10) |
 | `incident_type` | filter by type enum |
 | `status` | filter by status enum |
-| `author_id` | filter by reporter id |
 
 **200** — `{ "data": { "incidents": [ … ] }, "meta": { … }, "pagination": { … } }`
 
@@ -334,21 +340,27 @@ Each incident summary:
   "title": "Lorry overturned",
   "description": "…",
   "incident_type": "red-flag",
+  "type": "red-flag",
   "status": "draft",
   "location_name": "Thika Road",
+  "location": "Thika Road",
   "latitude": -1.221,
   "longitude": 36.885,
   "author_id": "c76d…",
-  "created_at": "…",
-  "updated_at": "…",
   "author": "wanjiku",
-  "media_count": 2
+  "reporter": "wanjiku",
+  "author_email": "wanjiku@example.com",
+  "reporter_email": "wanjiku@example.com",
+  "media": [ { "id": "…", "media_type": "image", "file_name": "scene.png", "url": "…" } ],
+  "created_at": "…",
+  "updated_at": "…"
 }
 ```
 
-### `GET /incidents/mine` — 🔒 token
-
-Same shape and query parameters as the list, restricted to the current user.
+> 🔒 **Privacy rule:** `author_email`/`reporter_email` are only included when the
+> request carries a **valid admin token** (they power the admin dashboard's
+> reporter column/filter). Anonymous and citizen callers never receive them;
+> SOS alerts never carry an author identity in the first place.
 
 ### `GET /incidents/<id>` — *public*
 
@@ -375,7 +387,7 @@ Errors: `404` unknown id.
 
 Errors: `400` validation · `401` no/invalid token.
 
-### `PATCH /incidents/<id>` — 🔒 owner (draft only) or admin
+### `PATCH /incidents/<id>` — 🔒 owner (draft only)
 
 Partial update; any of `title`, `description`, `incident_type`, `location_name`,
 `latitude`, `longitude` (at least one field):
@@ -386,9 +398,9 @@ Partial update; any of `title`, `description`, `incident_type`, `location_name`,
 
 **200** — full incident.
 
-Errors: `403` not the owner · `404` unknown id · `409` no longer a draft.
+Errors: `403` not the owner **or** no longer a draft · `404` unknown id.
 
-### `PATCH /incidents/<id>/location` — 🔒 owner (draft only) or admin
+### `PATCH /incidents/<id>/location` — 🔒 owner (draft only)
 
 ```json
 { "latitude": -1.3, "longitude": 36.9, "location_name": "Nyayo Stadium" }
@@ -396,7 +408,7 @@ Errors: `403` not the owner · `404` unknown id · `409` no longer a draft.
 
 **200** — full incident with updated coordinates.
 
-### `DELETE /incidents/<id>` — 🔒 owner (draft only) or admin
+### `DELETE /incidents/<id>` — 🔒 owner · admin (any status)
 
 Deletes the report **and all its media files** (disks and rows).
 
@@ -451,7 +463,7 @@ owner · `409` incident no longer a draft · `413` request over 100 MB.
 
 Streams the raw file with the stored MIME type (use as `<img src>` / `<video src>`).
 
-### `DELETE /media/<media_id>` — 🔒 owner (draft only) or admin
+### `DELETE /media/<media_id>` — 🔒 owner (draft only)
 
 Removes the file and its row. **200** — `"Media deleted."`
 
@@ -464,7 +476,9 @@ Removes the file and its row. **200** — `"Media deleted."`
 Same payload/response as citizen login, but restricted to admins:
 
 - Valid admin credentials → **200** `{ data: { access_token, user(role: "admin") } }`
-- Valid **citizen** credentials → **403** `"Access denied. Administrator privileges required."`
+- Valid **citizen** credentials → **401** with the generic
+  `"Invalid email/username or password."` — the endpoint does not reveal
+  whether the account exists.
 - Bad credentials → `401`
 
 ### `GET /admin/stats` — 🔒 admin token
@@ -477,13 +491,41 @@ Incident counts for the dashboard:
   "data": {
     "total": 12,
     "draft": 3,
+    "pending": 3,
     "under_investigation": 5,
     "resolved": 3,
     "rejected": 1,
-    "sos": 2
+    "total_users": 7
   }
 }
 ```
+
+(`pending` mirrors `draft` for the dashboard chips; `total_users` counts
+registered accounts.)
+
+### `GET /admin/users` — 🔒 admin token
+
+Every registered account, newest first, with report counts:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "users": [
+      {
+        "id": "c76d…",
+        "username": "wanjiku",
+        "email": "wanjiku@example.com",
+        "role": "user",
+        "created_at": "…",
+        "reports_count": 3
+      }
+    ],
+    "total": 7
+  }
+}
+```
+
 
 ### `PATCH /admin/incidents/<id>/status` — 🔒 admin token
 

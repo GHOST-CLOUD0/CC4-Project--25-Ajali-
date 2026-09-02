@@ -1,5 +1,5 @@
 from flask import Blueprint, request
-from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required
+from flask_jwt_extended import get_jwt, get_jwt_identity, jwt_required, verify_jwt_in_request
 
 from app.services import IncidentService, ServiceError
 from app.utils.pagination import paginate
@@ -8,13 +8,29 @@ from app.utils.responses import error, success
 incidents_bp = Blueprint("incidents", __name__)
 
 
+def _viewer_is_admin() -> bool:
+    """True when the request carries a *valid* admin token.
+
+    Soft check: missing/expired/invalid tokens simply read as "not admin",
+    so the public feed and detail endpoints keep working for everyone.
+    """
+    try:
+        verify_jwt_in_request(optional=True)
+    except Exception:
+        return False
+    return get_jwt().get("role") == "admin"
+
+
 @incidents_bp.get("")
 def list_incidents():
     query = IncidentService.get_incidents_query(
         incident_type=request.args.get("incident_type", request.args.get("type")),
         status=request.args.get("status"),
     )
-    items, meta = paginate(query, serialize=lambda item: item.to_dict())
+    include_private = _viewer_is_admin()
+    items, meta = paginate(
+        query, serialize=lambda item: item.to_dict(include_private=include_private)
+    )
     return success({"incidents": items}, meta=meta, pagination=meta)
 
 
@@ -45,7 +61,7 @@ def create_incident():
 def get_incident(incident_id):
     try:
         incident = IncidentService.get_incident(incident_id)
-        return success({"incident": incident.to_dict()})
+        return success({"incident": incident.to_dict(include_private=_viewer_is_admin())})
     except ServiceError as err:
         return error(err.message, err.status_code)
 
