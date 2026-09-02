@@ -65,6 +65,15 @@ class IncidentService:
         if not title_str or not desc_str or not inc_type:
             raise ValidationError("title, description, and incident_type are required.")
 
+        if not 5 <= len(title_str) <= 200:
+            raise ValidationError("Title must be between 5 and 200 characters.")
+
+        if not 5 <= len(desc_str) <= 5000:
+            raise ValidationError("Description must be between 5 and 5000 characters.")
+
+        if inc_type == IncidentType.SOS:
+            raise ValidationError("SOS alerts must be sent via POST /api/v1/sos.")
+
         if inc_type not in IncidentType.ALL:
             raise ValidationError("Invalid incident type.")
 
