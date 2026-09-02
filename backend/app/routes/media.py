@@ -19,6 +19,8 @@ def upload_media(incident_id):
             upload_folder=current_app.config["UPLOAD_FOLDER"],
             allowed_images=list(current_app.config["ALLOWED_IMAGE_EXTENSIONS"]),
             allowed_videos=list(current_app.config["ALLOWED_VIDEO_EXTENSIONS"]),
+            max_image_size=current_app.config.get("MAX_IMAGE_SIZE"),
+            max_video_size=current_app.config.get("MAX_VIDEO_SIZE"),
         )
         return success({"media": media.to_dict()}, status=201, message="Media uploaded.")
     except ServiceError as err:
