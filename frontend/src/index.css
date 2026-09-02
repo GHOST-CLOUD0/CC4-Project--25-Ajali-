@@ -78,16 +78,148 @@ body {
 /* ------------------------------------------------------------------ */
 /* Status bar                                                         */
 /* ------------------------------------------------------------------ */
-.statusbar {
+/* Top Brand Navbar & Header                                          */
+/* ------------------------------------------------------------------ */
+.top-brand-navbar {
   width: 100%;
-  min-height: 44px;
+  min-height: 52px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 20px;
-  color: var(--ink);
+  padding: 10px 18px;
+  background: #ffffff;
+  border-bottom: 1px solid var(--line);
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
-.statusbar .sb-right { display: flex; align-items: center; gap: 5px; }
+
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+}
+
+.brand-badge {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.brand-text strong {
+  color: var(--brand-red);
+}
+
+.top-nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.network-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.network-online {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+
+.network-offline {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.network-status .status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.network-offline .status-dot {
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.nav-icon-btn {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.08s ease;
+}
+
+.nav-icon-btn:hover {
+  background: #f1f3f5;
+  transform: scale(1.04);
+}
+
+.user-profile-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  transition: background 0.15s ease;
+}
+
+.user-profile-badge:hover {
+  background: #eef2f6;
+}
+
+.user-profile-badge .role-tag {
+  background: var(--brand-red);
+  color: #ffffff;
+  font-size: 10px;
+  padding: 2px 6px;
+  border-radius: 6px;
+  text-transform: uppercase;
+}
+
+.nav-signin-link {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--brand-red);
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--brand-red-soft);
+  border: 1px solid rgba(225, 29, 72, 0.2);
+  transition: background 0.15s ease;
+}
+
+.nav-signin-link:hover {
+  background: rgba(225, 29, 72, 0.15);
+}
+
+.statusbar {
+  display: none;
+}
 
 
 /* ------------------------------------------------------------------ */
