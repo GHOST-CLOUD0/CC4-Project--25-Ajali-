@@ -88,6 +88,13 @@ class Incident(db.Model):
         return self.status == IncidentStatus.DRAFT
 
     def to_dict(self, include_private: bool = False):
+        created = self.created_at
+        if created and created.tzinfo is None:
+            created = created.replace(tzinfo=timezone.utc)
+        updated = self.updated_at
+        if updated and updated.tzinfo is None:
+            updated = updated.replace(tzinfo=timezone.utc)
+
         payload = {
             "id": self.id,
             "title": self.title,
@@ -103,8 +110,8 @@ class Incident(db.Model):
             "author": self.author.username if self.author else "Anonymous",
             "reporter": self.author.username if self.author else "Anonymous",
             "media": [m.to_dict() for m in self.media.all()] if self.media else [],
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": created.isoformat() if created else None,
+            "updated_at": updated.isoformat() if updated else None,
         }
         if include_private:
             # Reporter contact details are for the admin dashboard only —

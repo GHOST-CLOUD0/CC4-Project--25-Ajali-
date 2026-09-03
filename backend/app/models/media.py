@@ -58,6 +58,13 @@ class Media(db.Model):
             setattr(self, key, value)
 
     def to_dict(self):
+        created = self.created_at
+        if created and created.tzinfo is None:
+            created = created.replace(tzinfo=timezone.utc)
+        updated = self.updated_at
+        if updated and updated.tzinfo is None:
+            updated = updated.replace(tzinfo=timezone.utc)
+
         return {
             "id": self.id,
             "incident_id": self.incident_id,
@@ -68,8 +75,8 @@ class Media(db.Model):
             "file_size": self.file_size,
             "caption": self.caption,
             "url": f"/api/v1/media/{self.id}/file",
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            "created_at": created.isoformat() if created else None,
+            "updated_at": updated.isoformat() if updated else None,
         }
 
     def __repr__(self):

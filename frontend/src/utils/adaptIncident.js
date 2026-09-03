@@ -31,13 +31,22 @@ function roundCoord(value) {
 
 export function relativeAge(isoDate) {
   if (!isoDate) return "recently";
-  const seconds = Math.max(0, (Date.now() - new Date(isoDate).getTime()) / 1000);
+  let normalized = String(isoDate).trim();
+  // If the ISO timestamp is missing timezone offset (naive from SQLite/DB), enforce UTC parsing
+  if (!normalized.endsWith("Z") && !/[+-]\d{2}:?\d{2}$/.test(normalized)) {
+    normalized = `${normalized}Z`;
+  }
+  const dateObj = new Date(normalized);
+  const timeMs = dateObj.getTime();
+  if (Number.isNaN(timeMs)) return "recently";
+
+  const seconds = Math.max(0, (Date.now() - timeMs) / 1000);
   if (seconds < 60) return "just now";
   const minutes = Math.floor(seconds / 60);
   if (minutes < 60) return `${minutes} min ago`;
-  const hours = Math.floor(minutes / 60);
+  const hours = Math.floor(seconds / 3600);
   if (hours < 24) return `${hours} hr${hours === 1 ? "" : "s"} ago`;
-  const days = Math.floor(hours / 24);
+  const days = Math.floor(seconds / 86400);
   return `${days} day${days === 1 ? "" : "s"} ago`;
 }
 

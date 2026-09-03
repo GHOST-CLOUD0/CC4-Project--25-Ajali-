@@ -112,4 +112,10 @@ describe("relativeAge", () => {
     expect(relativeAge(new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString())).toBe("3 hrs ago");
     expect(relativeAge(new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString())).toBe("2 days ago");
   });
+
+  it("correctly parses naive UTC ISO timestamps without trailing Z", () => {
+    const date3MinAgo = new Date(Date.now() - 3 * 60 * 1000);
+    const naiveIso = date3MinAgo.toISOString().replace("Z", "");
+    expect(relativeAge(naiveIso)).toBe("3 min ago");
+  });
 });
